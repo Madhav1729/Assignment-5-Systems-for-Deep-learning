@@ -1,10 +1,3 @@
-/*
- * attn_loops.c -- Q3a: loop reordering so the compiler can vectorise.
- *
- * Placeholder: replace the body of attention() with your implementation.
- * Keep the driver (main) below unchanged. See attn_naive.c for the input and
- * output format.
- */
 #define _POSIX_C_SOURCE 200809L
 #include <math.h>
 #include <stdint.h>
@@ -16,14 +9,77 @@
 #include <omp.h>
 #endif
 
-/* ------------------------------------------------------------------------- */
-/* attention(): write your implementation here.                               */
-/* ------------------------------------------------------------------------- */
+static float *transpose_keys(const float *K, int N, int d)
+{
+    float *Kt = malloc((size_t)N * d * sizeof(float));
+    for (int j = 0; j < N; j++)
+        for (int k = 0; k < d; k++)
+            Kt[(size_t)k * N + j] = K[(size_t)j * d + k];
+    return Kt;
+}
+
+static void compute_score_row(const float *restrict q, const float *restrict Kt, float *restrict row, int N, int d,
+                              float scale)
+{
+    for (int j = 0; j < N; j++)
+        row[j] = 0.0f;
+
+    for (int k = 0; k < d; k++) {
+        const float query = q[k] * scale;
+        const float *restrict keys = Kt + (size_t)k * N;
+        for (int j = 0; j < N; j++)
+            row[j] += query * keys[j];
+    }
+}
+
+static void softmax_row(float *restrict row, int N)
+{
+    float max = row[0];
+    for (int j = 1; j < N; j++)
+        if (row[j] > max)
+            max = row[j];
+
+    float sum = 0.0f;
+    for (int j = 0; j < N; j++) {
+        row[j] = expf(row[j] - max);
+        sum += row[j];
+    }
+
+    const float inverse_sum = 1.0f / sum;
+    for (int j = 0; j < N; j++)
+        row[j] *= inverse_sum;
+}
+
+static void compute_output_row(const float *restrict row, const float *restrict V, float *restrict o, int N, int d)
+{
+    for (int k = 0; k < d; k++)
+        o[k] = 0.0f;
+
+    for (int j = 0; j < N; j++) {
+        const float weight = row[j];
+        const float *restrict v = V + (size_t)j * d;
+        for (int k = 0; k < d; k++)
+            o[k] += weight * v[k];
+    }
+}
+
 void attention(const float *Q, const float *K, const float *V, float *O, int N, int d)
 {
-    (void)Q; (void)K; (void)V; (void)O; (void)N; (void)d;
-    printf("attn_loops: not implemented yet\n");
-    exit(0); /* no output file is written, so `make check` skips this variant */
+    const float scale = 1.0f / sqrtf((float)d);
+    float *S = malloc((size_t)N * N * sizeof(float));
+    float *Kt = transpose_keys(K, N, d);
+
+    for (int i = 0; i < N; i++)
+        compute_score_row(Q + (size_t)i * d, Kt, S + (size_t)i * N, N, d, scale);
+
+    for (int i = 0; i < N; i++)
+        softmax_row(S + (size_t)i * N, N);
+
+    for (int i = 0; i < N; i++)
+        compute_output_row(S + (size_t)i * N, V, O + (size_t)i * d, N, d);
+
+    free(S);
+    free(Kt);
 }
 
 /* ------------------------------------------------------------------------- */

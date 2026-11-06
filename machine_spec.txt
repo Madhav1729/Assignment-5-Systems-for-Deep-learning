@@ -1,30 +1,30 @@
 # Machine specification (Q1). Fill in every field; give units. Fill in N/A if not applicable.
 
-CPU model                       :
-Microarchitecture               :
-Physical cores                  :
-Logical cores (hardware threads):
-Performance / efficiency cores  :
-Base clock (GHz)                :
-Max single-core clock (GHz)     :
-All-core clock under load (GHz) :
-SIMD instruction set and width  :
-FMA units per core              :
-Vector registers per core       :
-L1 data cache (per core)        :
-L2 cache (size, shared by)      :
-L3 cache (size, shared by)      :
-Cache line size (bytes)         :
-RAM size (GB)                   :
-RAM type, speed (MT/s), channels:
-Operating system                :
-Compiler and version            :
+CPU model                       : AMD Ryzen 7 6800H
+Microarchitecture               : Zen 3+ (Rembrandt)
+Physical cores                  : 8
+Logical cores (hardware threads): 16 (2 per core)
+Performance / efficiency cores  : N/A (8 identical cores, not a hybrid design)
+Base clock (GHz)                : 3.2 GHz
+Max single-core clock (GHz)     : 4.75 GHz
+All-core clock under load (GHz) : 3.85 GHz (sustained, AVX2 FMA load on 8 cores)
+SIMD instruction set and width  : AVX2 + FMA, 256-bit (8 FP32 lanes)
+FMA units per core              : 2 (256-bit each)
+Vector registers per core       : 16 (YMM, 256-bit)
+L1 data cache (per core)        : 32 KB
+L2 cache (size, shared by)      : 512 KB per core, not shared
+L3 cache (size, shared by)      : 16 MB, shared by all 8 cores
+Cache line size (bytes)         : 64 bytes
+RAM size (GB)                   : 16 GB
+RAM type, speed (MT/s), channels: DDR5 SODIMM, 4800 MT/s (rated 5600), 1 channel (1 x 16 GB)
+Operating system                : Fedora Linux 43, kernel 7.2.5
+Compiler and version            : clang 21.1.8
 
 # Derived (show the calculation in report.pdf)
-Peak FP32 GFLOP/s, one core     :
-Peak FP32 GFLOP/s, all cores    :
-Memory bandwidth (GB/s)         :
-Ridge point, one core (FLOP/B)  :
-Ridge point, all cores (FLOP/B) :
+Peak FP32 GFLOP/s, one core     : 152.0 GFLOP/s
+Peak FP32 GFLOP/s, all cores    : 985.6 GFLOP/s
+Memory bandwidth (GB/s)         : 38.4 GB/s theoretical (measured about 29 GB/s)
+Ridge point, one core (FLOP/B)  : 3.96 FLOP/B
+Ridge point, all cores (FLOP/B) : 25.67 FLOP/B
 
 
